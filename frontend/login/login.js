@@ -1,43 +1,51 @@
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Evita que recargue la página
+const loginForm = document.getElementById('loginForm');
 
-  const correo = document.getElementById('correoInput').value;
-  const contra = document.getElementById('passwordInput').value;
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Evita que recargue la página
 
-  try {
-    const response = await fetch('http://localhost:3000/usuarios/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, contra })
-    });
+    const correo = document.getElementById('correoInput').value;
+    const contra = document.getElementById('passwordInput').value;
 
-    const data = await response.json();
-console.log("Respuesta completa del login:", data);
+    try {
+      const response = await fetch('http://localhost:3000/usuarios/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo, contra })
+      });
 
-    if (response.ok) {
-      const usuario = data.usuario;
-       if (!usuario || !usuario._id) {
-    alert('Error: el servidor no devolvió datos válidos del usuario');
-    return;
-  }
-  localStorage.setItem('usuarioId', usuario._id);
-  localStorage.setItem('usuarioNombre', usuario.nombre);
-  localStorage.setItem('usuarioRol', usuario.rol);
- 
-     if (usuario.rol === 'mesero') {
+      const data = await response.json();
+      console.log('Respuesta completa del login:', data);
 
-        window.location.href = '../mesero/mesero.html';
+      if (response.ok) {
+        const usuario = data.usuario;
+
+        if (!usuario || !usuario._id) {
+          alert('Error: el servidor no devolvió datos válidos del usuario');
+          return;
+        }
+
+        localStorage.setItem('usuarioId', usuario._id);
+        localStorage.setItem('usuarioNombre', usuario.nombre);
+        localStorage.setItem('usuarioRol', usuario.rol);
+
+        if (usuario.rol === 'mesero') {
+          window.location.href = '../mesero/mesero.html';
+        } else {
+          alert(`¡Login exitoso! Rol detectado: ${usuario.rol}`);
+          // Podés redirigir a otra página según el rol:
+          // if (usuario.rol === 'admin') window.location.href = 'admin.html';
+          // if (usuario.rol === 'cocinero') window.location.href = 'cocinero.html';
+        }
       } else {
-        alert(`¡Login exitoso! Rol detectado: ${rol}`);
-        // Podés redirigir a otra página según el rol:
-        // if (data.rol === 'admin') window.location.href = 'admin.html';
-        // if (data.rol === 'cocinero') window.location.href = 'cocinero.html';
+        alert(data.mensaje);
       }
-    } else {
-      alert(data.mensaje);
+    } catch (error) {
+      alert('Error de conexión con el servidor');
+      console.error(error);
     }
-  } catch (error) {
-    alert('Error de conexión con el servidor');
-    console.error(error);
-  }
-});
+  });
+} else {
+  console.error('No se encontró el formulario de login en la página.');
+}
+
